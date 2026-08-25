@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5fafc">
+  <title>Grade 2 Speaking Practice</title>
+
+  <!-- GitHub Pages용: 외부 CDN만 사용하고 Codelet 전용 SDK는 제거했습니다. -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #18314a;
+      --muted: #678096;
+      --line: #dce7ef;
+      --mint: #11bb8e;
+      --mint-deep: #078b69;
+      --sky: #277ca2;
+      --amber: #ffb800;
+      --coral: #f36e5b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: #f5fafc; }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      background:
+        radial-gradient(circle at 85% 3%, rgba(170, 240, 222, 0.45), transparent 23rem),
+        linear-gradient(180deg, #f9fcfd 0%, #f2f9fc 100%);
+    }
+
+    button { font: inherit; }
+
+    button:focus-visible {
+      outline: 3px solid #56c8ef;
+      outline-offset: 3px;
+    }
+
+    .app-shell {
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    .study-card {
+      border: 1px solid var(--line);
+      box-shadow: 0 11px 28px rgba(37, 78, 105, 0.06);
+    }
+
+    .unit-button,
+    .listen-button,
+    .score-panel {
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .unit-button:hover,
+    .listen-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .unit-button.is-current {
+      color: var(--mint-deep);
+      border-color: #9fe7d3;
+      background: #eafff8;
+    }
+
+    .recording-ring {
+      animation: recordPulse 1.25s infinite;
+    }
+
+    .score-panel.has-result {
+      transform: translateY(-2px);
+    }
+
+    .dialogue-line {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dialogue-line.is-playing {
+      transform: translateX(4px);
+      box-shadow: 0 8px 20px rgba(17, 187, 142, 0.13);
+      border-color: #9fe7d3;
+    }
+
+    @keyframes recordPulse {
+      0% { box-shadow: 0 0 0 0 rgba(249, 83, 83, 0.4); }
+      70% { box-shadow: 0 0 0 13px rgba(249, 83, 83, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(249, 83, 83, 0); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="w-full px-4 pt-5 sm:px-7 sm:pt-8">
+      <div class="mx-auto flex max-w-4xl flex-col gap-5 rounded-[26px] border border-[#dce7ef] bg-white/90 px-5 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-7">
+        <div>
+          <p class="mb-1 text-xs font-bold tracking-[.18em] text-[#11bb8e]">ENGLISH SPEAKING LAB</p>
+          <h1 class="font-['Fraunces'] text-3xl font-bold leading-tight text-[#18314a] sm:text-4xl">Speaking Practice</h1>
+        </div>
+        <div class="flex items-center gap-3 rounded-2xl bg-[#f1fbf8] px-4 py-3">
+          <i data-lucide="sparkles" class="h-5 w-5 text-[#11bb8e]" aria-hidden="true"></i>
+          <div>
+            <p class="text-xs font-semibold text-[#678096]">전체 대화 연습 진행률</p>
+            <p id="header-progress" class="text-sm font-bold text-[#078b69]" aria-live="polite">0 / 8</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-4xl px-4 pb-10 pt-6 sm:px-7">
+      <nav aria-label="단원 선택" class="mb-5 flex flex-wrap gap-2">
+        <button type="button" data-unit="5" class="unit-button rounded-full border border-[#dce7ef] bg-white px-4 py-2 text-sm font-bold text-[#678096]">5단원</button>
+        <button type="button" data-unit="6" class="unit-button rounded-full border border-[#dce7ef] bg-white px-4 py-2 text-sm font-bold text-[#678096]">6단원</button>
+        <button type="button" data-unit="7" class="unit-button rounded-full border border-[#dce7ef] bg-white px-4 py-2 text-sm font-bold text-[#678096]">7단원</button>
+        <button type="button" data-unit="8" class="unit-button rounded-full border border-[#dce7ef] bg-white px-4 py-2 text-sm font-bold text-[#678096]">8단원</button>
+      </nav>
+
+      <section class="study-card rounded-[25px] bg-white p-5 sm:p-8" aria-labelledby="practice-heading">
+        <div class="flex flex-col gap-3 border-b border-[#e7eef3] pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p id="unit-heading" class="mb-1 text-sm font-bold text-[#11bb8e]">UNIT 5 · 대화문 듣기</p>
+            <h2 id="practice-heading" class="text-2xl font-bold text-[#18314a]">A와 B의 대화를 들어 보세요</h2>
+          </div>
+          <span class="w-fit rounded-full bg-[#fff5d8] px-3 py-1 text-xs font-bold text-[#9b6400]">대화문 + 핵심 표현</span>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between gap-3" role="group" aria-label="대화문 이동">
+          <button id="nav-prev" type="button" class="rounded-lg p-2 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50" aria-label="이전 대화">
+            <i data-lucide="chevron-left" class="h-5 w-5" aria-hidden="true"></i>
+          </button>
+
+          <div class="flex-grow">
+            <p id="dialogue-label" class="mb-2 text-center text-xs font-bold text-[#11bb8e]">대화 01</p>
+
+            <div id="line-a" class="dialogue-line rounded-2xl border border-[#cfe7f3] bg-[#f1fbff] px-4 py-4">
+              <div class="flex gap-3">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#277ca2] text-sm font-bold text-white">A</span>
+                <p id="dialogue-a" class="pt-1 text-[17px] font-semibold leading-relaxed text-[#18314a]"></p>
+              </div>
+            </div>
+
+            <div id="line-b" class="dialogue-line mt-3 rounded-2xl border border-[#cceee4] bg-[#f0fffa] px-4 py-4">
+              <div class="flex gap-3">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#11bb8e] text-sm font-bold text-white">B</span>
+                <p id="dialogue-b" class="pt-1 text-[17px] font-semibold leading-relaxed text-[#18314a]"></p>
+              </div>
+            </div>
+          </div>
+
+          <button id="nav-next" type="button" class="rounded-lg p-2 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50" aria-label="다음 대화">
+            <i data-lucide="chevron-right" class="h-5 w-5" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <section class="mt-7 rounded-[22px] bg-[#f4f8fa] px-5 py-7 text-center" aria-labelledby="listen-heading">
+          <p id="listen-heading" class="mb-4 text-sm font-bold text-[#46677e]">대화문 듣기</p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <button id="listen-a" type="button" class="listen-button inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 font-bold text-[#277ca2] shadow-sm">
+              <i data-lucide="volume-2" class="h-4 w-4" aria-hidden="true"></i> A 문장 듣기
+            </button>
+            <button id="listen-b" type="button" class="listen-button inline-flex items-center gap-2 rounded-xl bg-white px-4 py-3 font-bold text-[#078b69] shadow-sm">
+              <i data-lucide="volume-2" class="h-4 w-4" aria-hidden="true"></i> B 문장 듣기
+            </button>
+            <button id="listen-all" type="button" class="listen-button inline-flex items-center gap-2 rounded-xl bg-[#11bb8e] px-4 py-3 font-bold text-white shadow-sm hover:bg-[#078b69]">
+              <i data-lucide="messages-square" class="h-4 w-4" aria-hidden="true"></i> 전체 대화 듣기
+            </button>
+          </div>
+        </section>
+
+        <div class="mt-5 rounded-2xl border border-[#dce7ef] bg-[#fbfdfe] px-5 py-4 text-center">
+          <button id="meaning-toggle" type="button" class="rounded-lg border border-[#dce7ef] bg-white px-3 py-2 text-xs font-bold text-[#46677e] hover:bg-slate-50">
+            해석 보기
+          </button>
+          <div id="meaning-text" class="mt-3 hidden rounded-xl bg-[#f1fbf8] px-4 py-3 text-left text-sm font-semibold text-[#31526e]" aria-live="polite">
+            <p id="meaning-a"></p>
+            <p id="meaning-b" class="mt-2"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="study-card mt-5 rounded-[25px] bg-white p-5 sm:p-8" aria-labelledby="score-heading">
+        <div class="text-center">
+          <p class="text-sm font-bold text-[#11bb8e]">말하기 확인</p>
+          <h2 id="score-heading" class="mt-1 text-2xl font-bold text-[#18314a]">핵심 표현을 말해 보세요</h2>
+          <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-[#678096]">마이크 버튼을 누른 뒤 위의 핵심 표현을 자연스럽게 말해 보세요.</p>
+        </div>
+
+        <div class="mx-auto mt-6 max-w-2xl rounded-2xl border border-[#d8ece5] bg-white px-5 py-4 text-left">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-xs font-bold tracking-[.12em] text-[#11bb8e]">SPEAKING MISSION</p>
+            <p id="target-counter" class="text-xs font-bold text-[#678096]" aria-live="polite">핵심표현 1 / 2</p>
+          </div>
+
+          <div class="mt-2 flex items-center gap-2">
+            <p id="target-text" class="min-w-0 flex-1 text-lg font-bold leading-relaxed text-[#18314a]"></p>
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          <article id="accuracy-panel" class="score-panel rounded-2xl border border-[#cceee4] bg-[#f0fffa] p-5 text-center">
+            <div class="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#078b69] shadow-sm">
+              <i data-lucide="target" class="h-4 w-4" aria-hidden="true"></i>
+            </div>
+            <h3 class="mt-3 text-lg font-bold text-[#078b69]">문장 정확성</h3>
+            <p class="mt-1 font-bold text-[#078b69]">
+              <span id="accuracy-score" class="text-3xl">--</span><span class="ml-1 text-base">점</span>
+            </p>
+            <p id="accuracy-stars" class="mt-1 text-lg tracking-[.05em] text-[#ffb800]" aria-label="문장 정확성 별점">☆☆☆</p>
+          </article>
+
+          <article id="fluency-panel" class="score-panel rounded-2xl border border-[#cfe7f3] bg-[#f1fbff] p-5 text-center">
+            <div class="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#277ca2] shadow-sm">
+              <i data-lucide="waves" class="h-4 w-4" aria-hidden="true"></i>
+            </div>
+            <h3 class="mt-3 text-lg font-bold text-[#277ca2]">말하기 유창성</h3>
+            <p class="mt-1 font-bold text-[#277ca2]">
+              <span id="fluency-score" class="text-3xl">--</span><span class="ml-1 text-base">점</span>
+            </p>
+            <p id="fluency-stars" class="mt-1 text-lg tracking-[.05em] text-[#ffb800]" aria-label="말하기 유창성 별점">☆☆☆</p>
+          </article>
+        </div>
+
+        <div class="mt-6 flex flex-col items-center">
+          <button id="record-button" type="button" class="inline-flex items-center gap-2 rounded-xl bg-[#11bb8e] px-5 py-3 font-bold text-white shadow-sm transition hover:bg-[#078b69] disabled:cursor-not-allowed">
+            <i data-lucide="mic" class="h-5 w-5" aria-hidden="true"></i>
+            <span>내 발음 말하기</span>
+          </button>
+
+          <p id="record-status" class="mt-3 min-h-5 text-center text-sm font-semibold text-[#678096]" aria-live="polite"></p>
+
+          <div id="transcript-wrap" class="mt-3 hidden w-full rounded-xl border border-[#dce7ef] bg-[#fbfdfe] px-4 py-3 text-center">
+            <p class="mb-1 text-xs font-bold text-[#678096]">음성인식 결과</p>
+            <p id="transcript" class="text-sm text-[#31526e]"></p>
+          </div>
+
+          <button id="retry-button" type="button" class="mt-4 hidden rounded-lg border border-[#9fe7d3] bg-white px-4 py-2 text-sm font-bold text-[#078b69] transition hover:bg-[#f0fffa]">
+            다시 도전하기
+          </button>
+        </div>
+      </section>
+
+      <aside class="mx-auto mt-5 max-w-md rounded-[20px] bg-[#f1f8fb] px-5 py-4 text-center shadow-sm" aria-label="전체 연습 결과">
+        <p class="text-xs font-bold text-[#678096]">전체 평균 점수</p>
+        <div class="mt-2 grid grid-cols-2 divide-x divide-[#d4e4eb]">
+          <div class="px-2">
+            <p class="text-xs font-bold text-[#078b69]">문장 정확성</p>
+            <p class="mt-1 text-lg font-bold text-[#31526e]"><span id="overall-accuracy">--</span><span class="text-sm">점</span></p>
+          </div>
+          <div class="px-2">
+            <p class="text-xs font-bold text-[#277ca2]">말하기 유창성</p>
+            <p class="mt-1 text-lg font-bold text-[#31526e]"><span id="overall-fluency">--</span><span class="text-sm">점</span></p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="w-full px-4 pb-7 text-center sm:px-7">
+      <p class="text-xs text-[#8aa0b0]">Chrome 등 음성인식을 지원하는 브라우저에서 HTTPS로 접속하면 음성인식 기능을 사용할 수 있어요.</p>
+    </footer>
+  </div>
+
+  <script>
+    const dialogues = [
+      {
+        id: "u5-01",
+        unit: 5,
+        label: "대화 01",
+        a: "What does he look like?",
+        b: "He has a long body and short legs.",
+        target: "What does he look like?",
+        meaning: "그는 어떻게 생겼니?",
+        meaningB: "그는 몸이 길고 다리가 짧아."
+      },
+      {
+        id: "u5-02",
+        unit: 5,
+        label: "대화 02",
+        a: "I lost my backpack!",
+        b: "I'm sorry to hear that.",
+        target: "I'm sorry to hear that.",
+        meaning: "내 배낭을 잃어버렸어!",
+        meaningB: "그 말을 들으니 유감이야."
+      },
+      {
+        id: "u6-01",
+        unit: 6,
+        label: "대화 01",
+        a: "I'm interested in space travel.",
+        b: "Oh, that sounds awesome!",
+        target: "I'm interested in space travel.",
+        meaning: "나는 우주여행에 관심이 있어.",
+        meaningB: "오, 정말 멋지다!"
+      },
+      {
+        id: "u6-02",
+        unit: 6,
+        label: "대화 02",
+        a: "I want to be an astronaut like Neil Armstrong.",
+        b: "I hope your dream comes true.",
+        target: "I hope your dream comes true.",
+        meaning: "나는 닐 암스트롱처럼 우주 비행사가 되고 싶어.",
+        meaningB: "네 꿈이 이루어지기를 바라."
+      },
+      {
+        id: "u7-01",
+        unit: 7,
+        label: "대화 01",
+        a: "How much is this yellow backpack?",
+        b: "It's 40 dollars.",
+        target: "How much is this yellow backpack?",
+        meaning: "이 노란색 배낭은 얼마인가요?",
+        meaningB: "40달러입니다."
+      },
+      {
+        id: "u7-02",
+        unit: 7,
+        label: "대화 02",
+        a: "Can you recommend a jacket for me, please?",
+        b: "Of course! How about this blue jacket?",
+        target: "Can you recommend a jacket for me, please?",
+        meaning: "저에게 재킷 하나를 추천해 주시겠어요?",
+        meaningB: "물론이죠! 이 파란 재킷은 어때요?"
+      },
+      {
+        id: "u8-01",
+        unit: 8,
+        label: "대화 01",
+        a: "Have you heard about the new movie?",
+        b: "No, I haven't.",
+        target: "Have you heard about the new movie?",
+        meaning: "새 영화에 관해 들어 봤니?",
+        meaningB: "아니, 들어 보지 못했어."
+      },
+      {
+        id: "u8-02",
+        unit: 8,
+        label: "대화 02",
+        a: "Let's watch the movie together.",
+        b: "Sounds good! I'm looking forward to it.",
+        target: "I'm looking forward to it.",
+        meaning: "나는 그것을 기대하고 있어.",
+        meaningB: "좋아! 정말 기대된다."
+      }
+    ];
+
+    const resultByDialogueId = new Map();
+
+    let selectedUnit = 5;
+    let selectedIndex = 0;
+    let recognition = null;
+    let isRecording = false;
+    let isSpeaking = false;
+    let dialogueSpeakTimer = null;
+
+    const statusEl = document.getElementById("record-status");
+    const meaningEl = document.getElementById("meaning-text");
+    const transcriptWrap = document.getElementById("transcript-wrap");
+    const transcriptEl = document.getElementById("transcript");
+    const recordButton = document.getElementById("record-button");
+    const retryButton = document.getElementById("retry-button");
+    const lineA = document.getElementById("line-a");
+    const lineB = document.getElementById("line-b");
+
+    function currentUnitDialogues() {
+      return dialogues.filter(dialogue => dialogue.unit === selectedUnit);
+    }
+
+    function currentDialogue() {
+      return currentUnitDialogues()[selectedIndex];
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function normalize(text) {
+      return text
+        .toLowerCase()
+        .replace(/[’]/g, "'")
+        .replace(/[^a-z\s']/g, " ")
+        .replace(/'/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function getWords(text) {
+      return normalize(text).split(" ").filter(Boolean);
+    }
+
+    function compareWordSequences(targetWords, spokenWords) {
+      const rows = targetWords.length + 1;
+      const cols = spokenWords.length + 1;
+      const dp = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+      for (let i = 0; i < rows; i += 1) dp[i][0] = i;
+      for (let j = 0; j < cols; j += 1) dp[0][j] = j;
+
+      for (let i = 1; i < rows; i += 1) {
+        for (let j = 1; j < cols; j += 1) {
+          const substitution = dp[i - 1][j - 1] +
+            (targetWords[i - 1] === spokenWords[j - 1] ? 0 : 1);
+
+          dp[i][j] = Math.min(
+            dp[i - 1][j] + 1,
+            dp[i][j - 1] + 1,
+            substitution
+          );
+        }
+      }
+
+      return dp[targetWords.length][spokenWords.length];
+    }
+
+    function calculateAccuracyScore(transcript, targetText) {
+      const targetWords = getWords(targetText);
+      const spokenWords = getWords(transcript);
+      const distance = compareWordSequences(targetWords, spokenWords);
+      const maxLength = Math.max(targetWords.length, spokenWords.length);
+      const score = maxLength
+        ? Math.round(Math.max(0, 1 - distance / maxLength) * 100)
+        : 0;
+
+      return { score };
+    }
+
+    function calculateFluencyScore(transcript, targetText) {
+      const targetWords = getWords(targetText);
+      const spokenWords = getWords(transcript);
+
+      if (!targetWords.length || !spokenWords.length) return { score: 0 };
+
+      const distance = compareWordSequences(targetWords, spokenWords);
+      const sequenceQuality = Math.max(
+        0,
+        1 - distance / Math.max(targetWords.length, spokenWords.length)
+      );
+
+      const repeatedWords = spokenWords.length - new Set(spokenWords).size;
+      const repeatPenalty = Math.min(
+        0.25,
+        (repeatedWords / spokenWords.length) * 0.5
+      );
+
+      const lengthPenalty = Math.min(
+        0.2,
+        (Math.abs(spokenWords.length - targetWords.length) / targetWords.length) * 0.2
+      );
+
+      return {
+        score: Math.round(
+          Math.max(
+            0,
+            Math.min(100, (sequenceQuality - repeatPenalty - lengthPenalty) * 100)
+          )
+        )
+      };
+    }
+
+    function stars(score) {
+      if (score === null || score === undefined) return "☆☆☆";
+      if (score >= 85) return "★★★";
+      if (score >= 60) return "★★☆";
+      return "★☆☆";
+    }
+
+    function updateProgressAndOverall() {
+      const completedResults = dialogues
+        .map(dialogue => resultByDialogueId.get(dialogue.id))
+        .filter(Boolean);
+
+      document.getElementById("header-progress").textContent =
+        `${completedResults.length} / ${dialogues.length}`;
+
+      const average = key => completedResults.length
+        ? Math.round(
+            completedResults.reduce((sum, result) => sum + result[key], 0) /
+            completedResults.length
+          )
+        : null;
+
+      const overallAccuracy = average("accuracyScore");
+      const overallFluency = average("fluencyScore");
+
+      document.getElementById("overall-accuracy").textContent =
+        overallAccuracy === null ? "--" : overallAccuracy;
+
+      document.getElementById("overall-fluency").textContent =
+        overallFluency === null ? "--" : overallFluency;
+    }
+
+    function updateTargetDisplay() {
+      const dialogue = currentDialogue();
+      const unitDialogues = currentUnitDialogues();
+
+      document.getElementById("target-text").textContent =
+        dialogue ? dialogue.target : "";
+
+      document.getElementById("target-counter").textContent =
+        dialogue ? `핵심표현 ${selectedIndex + 1} / ${unitDialogues.length}` : "핵심표현";
+
+      document.getElementById("target-text").setAttribute(
+        "aria-label",
+        dialogue ? `현재 핵심 표현: ${dialogue.target}` : "현재 핵심 표현"
+      );
+    }
+
+    function updateScoreDisplay() {
+      const dialogue = currentDialogue();
+      const result = dialogue ? resultByDialogueId.get(dialogue.id) : null;
+
+      document.getElementById("accuracy-score").textContent =
+        result ? result.accuracyScore : "--";
+
+      document.getElementById("fluency-score").textContent =
+        result ? result.fluencyScore : "--";
+
+      document.getElementById("accuracy-stars").textContent =
+        result ? stars(result.accuracyScore) : "☆☆☆";
+
+      document.getElementById("fluency-stars").textContent =
+        result ? stars(result.fluencyScore) : "☆☆☆";
+
+      document.getElementById("accuracy-panel").classList.toggle(
+        "has-result",
+        Boolean(result)
+      );
+
+      document.getElementById("fluency-panel").classList.toggle(
+        "has-result",
+        Boolean(result)
+      );
+    }
+
+    function stopSpeaking() {
+      if (dialogueSpeakTimer) {
+        clearTimeout(dialogueSpeakTimer);
+        dialogueSpeakTimer = null;
+      }
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      lineA.classList.remove("is-playing");
+      lineB.classList.remove("is-playing");
+      isSpeaking = false;
+    }
+
+    function resetCurrentView() {
+      stopSpeaking();
+      updateTargetDisplay();
+      updateScoreDisplay();
+      meaningEl.classList.add("hidden");
+      transcriptWrap.classList.add("hidden");
+      transcriptEl.textContent = "";
+      retryButton.classList.add("hidden");
+      setStatus("");
+    }
+
+    function updateDialogueDisplay() {
+      const dialogue = currentDialogue();
+      const unitDialogues = currentUnitDialogues();
+
+      if (!dialogue) return;
+
+      document.getElementById("unit-heading").textContent =
+        `UNIT ${selectedUnit} · 대화문 듣기`;
+
+      document.getElementById("dialogue-label").textContent = dialogue.label;
+      document.getElementById("dialogue-a").textContent = dialogue.a;
+      document.getElementById("dialogue-b").textContent = dialogue.b;
+
+      document.getElementById("nav-prev").disabled = selectedIndex === 0;
+      document.getElementById("nav-next").disabled =
+        selectedIndex === unitDialogues.length - 1;
+
+      resetCurrentView();
+    }
+
+    function updateUnitButtons() {
+      document.querySelectorAll("[data-unit]").forEach(button => {
+        const unit = Number(button.dataset.unit);
+        const isCurrent = unit === selectedUnit;
+
+        button.classList.toggle("is-current", isCurrent);
+        button.setAttribute("aria-current", isCurrent ? "page" : "false");
+      });
+    }
+
+    function selectUnit(unit) {
+      if (isRecording) {
+        setStatus("음성인식이 끝난 뒤 단원을 이동해 주세요.");
+        return;
+      }
+
+      selectedUnit = unit;
+      selectedIndex = 0;
+
+      updateUnitButtons();
+      updateDialogueDisplay();
+    }
+
+    function createUtterance(text, lineElement, rate = 0.9) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = rate;
+
+      utterance.onstart = () => {
+        lineA.classList.remove("is-playing");
+        lineB.classList.remove("is-playing");
+
+        if (lineElement) {
+          lineElement.classList.add("is-playing");
+        }
+      };
+
+      utterance.onerror = () => {
+        lineA.classList.remove("is-playing");
+        lineB.classList.remove("is-playing");
+        isSpeaking = false;
+        setStatus("문장을 재생하지 못했어요. 다시 눌러 주세요.");
+      };
+
+      return utterance;
+    }
+
+    function speakLine(speaker) {
+      const dialogue = currentDialogue();
+
+      if (!dialogue) return;
+
+      if (!("speechSynthesis" in window)) {
+        setStatus("이 브라우저에서는 문장 듣기를 지원하지 않아요.");
+        return;
+      }
+
+      stopSpeaking();
+      isSpeaking = true;
+
+      const isA = speaker === "a";
+      const text = isA ? dialogue.a : dialogue.b;
+      const line = isA ? lineA : lineB;
+
+      setStatus(`${isA ? "A" : "B"} 문장을 듣고 있어요.`);
+
+      const utterance = createUtterance(text, line);
+
+      utterance.onend = () => {
+        line.classList.remove("is-playing");
+        isSpeaking = false;
+        setStatus("핵심 표현을 따라 말해 볼까요?");
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakDialogue() {
+      const dialogue = currentDialogue();
+
+      if (!dialogue) return;
+
+      if (!("speechSynthesis" in window)) {
+        setStatus("이 브라우저에서는 문장 듣기를 지원하지 않아요.");
+        return;
+      }
+
+      stopSpeaking();
+      isSpeaking = true;
+      setStatus("전체 대화를 듣고 있어요.");
+
+      const utteranceA = createUtterance(dialogue.a, lineA);
+      const utteranceB = createUtterance(dialogue.b, lineB);
+
+      utteranceA.onend = () => {
+        lineA.classList.remove("is-playing");
+
+        dialogueSpeakTimer = window.setTimeout(() => {
+          dialogueSpeakTimer = null;
+
+          if (isSpeaking) {
+            window.speechSynthesis.speak(utteranceB);
+          }
+        }, 350);
+      };
+
+      utteranceB.onend = () => {
+        lineB.classList.remove("is-playing");
+        isSpeaking = false;
+        setStatus("핵심 표현을 따라 말해 볼까요?");
+      };
+
+      window.speechSynthesis.speak(utteranceA);
+    }
+
+    function setRecordingUI(recording) {
+      isRecording = recording;
+      recordButton.disabled = recording;
+      recordButton.classList.toggle("recording-ring", recording);
+      recordButton.classList.toggle("opacity-70", recording);
+    }
+
+    function getRecognitionErrorMessage(errorCode) {
+      const messages = {
+        "not-allowed": "마이크 권한이 차단되었어요. Chrome 주소창의 사이트 설정에서 마이크를 허용한 뒤 다시 시도해 주세요.",
+        "service-not-allowed": "이 환경에서는 음성인식 서비스를 사용할 수 없어요. Chrome에서 HTTPS 주소로 접속했는지 확인해 주세요.",
+        "audio-capture": "마이크를 찾을 수 없어요. 마이크 연결 상태와 브라우저 설정을 확인해 주세요.",
+        "network": "음성인식 서버에 연결하지 못했어요. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.",
+        "no-speech": "음성이 들리지 않았어요. 마이크에 가까이 또렷하게 말한 뒤 다시 시도해 주세요.",
+        "aborted": "음성인식이 중단되었어요. 다시 시도해 주세요.",
+        "language-not-supported": "영어 음성인식을 지원하지 않는 브라우저예요. 최신 Chrome에서 다시 시도해 주세요.",
+        "not-supported": "이 브라우저는 음성인식을 지원하지 않아요. 최신 Chrome에서 이용해 주세요."
+      };
+
+      return messages[errorCode] ||
+        "음성인식을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.";
+    }
+
+    function startRecognition() {
+      const Recognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      const dialogue = currentDialogue();
+
+      if (!Recognition) {
+        setStatus(getRecognitionErrorMessage("not-supported"));
+        return;
+      }
+
+      if (
+        !window.isSecureContext &&
+        location.hostname !== "localhost" &&
+        location.hostname !== "127.0.0.1"
+      ) {
+        setStatus(
+          "음성인식은 HTTPS로 배포된 사이트에서 사용할 수 있어요. GitHub Pages 주소로 접속해 주세요."
+        );
+        return;
+      }
+
+      if (!dialogue || isRecording) return;
+
+      stopSpeaking();
+
+      recognition = new Recognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setRecordingUI(true);
+        setStatus("듣고 있어요… 핵심 표현을 자연스럽게 말해 보세요.");
+      };
+
+      recognition.onresult = event => {
+        const transcript = event.results[0][0].transcript;
+        const targetDialogue = currentDialogue();
+
+        if (!targetDialogue) return;
+
+        const accuracy = calculateAccuracyScore(
+          transcript,
+          targetDialogue.target
+        );
+
+        const fluency = calculateFluencyScore(
+          transcript,
+          targetDialogue.target
+        );
+
+        transcriptEl.textContent = transcript;
+        transcriptWrap.classList.remove("hidden");
+
+        resultByDialogueId.set(targetDialogue.id, {
+          accuracyScore: accuracy.score,
+          fluencyScore: fluency.score
+        });
+
+        updateScoreDisplay();
+        updateProgressAndOverall();
+
+        retryButton.classList.remove("hidden");
+        setStatus(
+          "말하기 결과를 확인했어요. 다시 도전하며 점수를 높여 보세요."
+        );
+      };
+
+      recognition.onerror = event => {
+        setStatus(getRecognitionErrorMessage(event.error));
+        setRecordingUI(false);
+      };
+
+      recognition.onend = () => {
+        setRecordingUI(false);
+        recognition = null;
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        setRecordingUI(false);
+        recognition = null;
+
+        if (
+          error.name === "NotAllowedError" ||
+          error.name === "SecurityError"
+        ) {
+          setStatus(getRecognitionErrorMessage("not-allowed"));
+        } else if (error.name === "InvalidStateError") {
+          setStatus(
+            "음성인식이 이미 실행 중이에요. 잠시 후 다시 시도해 주세요."
+          );
+        } else {
+          setStatus(
+            "음성인식을 시작할 수 없어요. Chrome과 HTTPS 연결 상태를 확인해 주세요."
+          );
+        }
+      }
+    }
+
+    document.querySelectorAll("[data-unit]").forEach(button => {
+      button.addEventListener("click", () => {
+        selectUnit(Number(button.dataset.unit));
+      });
+    });
+
+    document.getElementById("nav-prev").addEventListener("click", () => {
+      if (isRecording) {
+        setStatus("음성인식이 끝난 뒤 대화를 이동해 주세요.");
+        return;
+      }
+
+      if (selectedIndex > 0) {
+        selectedIndex -= 1;
+        updateDialogueDisplay();
+      }
+    });
+
+    document.getElementById("nav-next").addEventListener("click", () => {
+      if (isRecording) {
+        setStatus("음성인식이 끝난 뒤 대화를 이동해 주세요.");
+        return;
+      }
+
+      const unitDialogues = currentUnitDialogues();
+
+      if (selectedIndex < unitDialogues.length - 1) {
+        selectedIndex += 1;
+        updateDialogueDisplay();
+      }
+    });
+
+    document.getElementById("listen-a").addEventListener("click", () => {
+      speakLine("a");
+    });
+
+    document.getElementById("listen-b").addEventListener("click", () => {
+      speakLine("b");
+    });
+
+    document.getElementById("listen-all").addEventListener("click", speakDialogue);
+
+    document.getElementById("meaning-toggle").addEventListener("click", () => {
+      const dialogue = currentDialogue();
+
+      if (!dialogue) return;
+
+      document.getElementById("meaning-a").textContent =
+        `A: ${dialogue.meaning}`;
+
+      document.getElementById("meaning-b").textContent =
+        `B: ${dialogue.meaningB}`;
+
+      const isHidden = meaningEl.classList.toggle("hidden");
+      document.getElementById("meaning-toggle").textContent =
+        isHidden ? "해석 보기" : "해석 닫기";
+    });
+
+    recordButton.addEventListener("click", startRecognition);
+
+    retryButton.addEventListener("click", () => {
+      if (isRecording) {
+        setStatus("음성인식이 끝난 뒤 다시 시도해 주세요.");
+        return;
+      }
+
+      transcriptWrap.classList.add("hidden");
+      transcriptEl.textContent = "";
+      retryButton.classList.add("hidden");
+      setStatus("한 번 더 자연스럽게 말해 볼까요?");
+      startRecognition();
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateUnitButtons();
+      updateDialogueDisplay();
+      updateProgressAndOverall();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
